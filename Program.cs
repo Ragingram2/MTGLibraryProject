@@ -10,7 +10,21 @@ namespace MTGLibraryProject
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World");
+            string input;
+            bool running = true;
+            Controller controller = new Controller();
+            controller.Initialize();
+            Console.WriteLine("Welcome to the MTG Library Application, please enter a command");
+            while (running)
+            {
+                input = Console.ReadLine();
+                if(input.ToLower().Equals("exit"))
+                {
+                    running = false;
+                    break;
+                }
+                controller.ProcessInput(input);
+            }
         }
     }
 }
