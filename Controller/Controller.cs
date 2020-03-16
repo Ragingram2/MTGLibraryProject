@@ -8,18 +8,22 @@ namespace MTGLibraryProject
 {
     public class Controller
     {
-        private delegate void Command(params object[] args);
+        private delegate void Command(params string[] args);
         private Dictionary<string, Command> commands;
+        private InventoryManager inventoryManager;
 
         public Controller()
         {
 
         }
+
         public void Initialize()
         {
             commands = new Dictionary<string, Command>();
+            inventoryManager = new InventoryManager();
             bindFuncToDel();
         }
+
         public void ProcessInput(string input)
         {
             input.ToLower();
@@ -29,7 +33,7 @@ namespace MTGLibraryProject
                 string[] inputSplit = input.Split(' ');
                 if (commands.ContainsKey(inputSplit[0]))
                 {
-                    List<object> args = new List<object>();
+                    List<string> args = new List<string>();
                     for(int i =0;i<inputSplit.Length-1;i++)
                     {
                         args.Add(inputSplit[1+i]);
@@ -38,21 +42,45 @@ namespace MTGLibraryProject
                 }
             }
         }
-        private static void search(object[] args)
+
+        private void search(string[] args)
         {
-            Console.WriteLine("Search has not been implemented yet");
-            Console.WriteLine("Here is your param {0}", args[0]);
+            string[] searchList = inventoryManager.Search(args);
+            Console.WriteLine("Here are your search results:");
+            if (searchList.Length > 0)
+            {
+                if (!searchList[0].StartsWith("Name:"))
+                {
+                    for (int i = 0; i < searchList.Length; i++)
+                    {
+                        Console.WriteLine("\t-" + searchList[i]);
+                    }
+                } 
+                else
+                {
+                    for (int i = 0; i < searchList.Length; i++)
+                    {
+                        Console.WriteLine(searchList[i]);
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Not Found");
+            }
         }
-        private void add(object[] args)
+
+        private void add(string[] args)
         {
-            Console.WriteLine("Add has not been implemented yet");
-            Console.WriteLine("Here is your param {0}", args[0]);
+            inventoryManager.Add(args[0]);
         }
+
         private void remove(object[] args)
         {
             Console.WriteLine("Remove has not been implemented yet");
             Console.WriteLine("Here is your param {0}", args[0]);
         }
+
         private void bindFuncToDel()
         {
             //bind manualy for now
@@ -64,6 +92,7 @@ namespace MTGLibraryProject
             mapFuncToString("remove", cmd);
 
         }
+
         private void mapFuncToString(string key,Command command)
         {
             commands[key] = command;
