@@ -27,18 +27,23 @@ namespace MTGLibraryProject
         public void ProcessInput(string input)
         {
             input.ToLower();
-            if (input[0].Equals('/'))
+
+            if (input.Length > 0 && input[0].Equals('/'))
             {
                 input = input.Substring(1);
                 string[] inputSplit = input.Split(' ');
                 if (commands.ContainsKey(inputSplit[0]))
                 {
                     List<string> args = new List<string>();
-                    for(int i =0;i<inputSplit.Length-1;i++)
+                    for (int i = 0; i < inputSplit.Length - 1; i++)
                     {
-                        args.Add(inputSplit[1+i]);
+                        args.Add(inputSplit[1 + i]);
                     }
                     commands[inputSplit[0]](args.ToArray());
+                }
+                else
+                {
+                    Console.WriteLine("This command does not exist");
                 }
             }
         }
@@ -49,7 +54,11 @@ namespace MTGLibraryProject
             Console.WriteLine("Here are your search results:");
             if (searchList.Length > 0)
             {
-                if (!searchList[0].StartsWith("Name:"))
+                if (searchList[0].Equals("This card is not in our library"))
+                {
+                    Console.WriteLine(searchList[0]);
+                }
+                else if (!searchList[0].StartsWith("Name:"))
                 {
                     for (int i = 0; i < searchList.Length; i++)
                     {
@@ -81,6 +90,15 @@ namespace MTGLibraryProject
             Console.WriteLine("Here is your param {0}", args[0]);
         }
 
+        private void showAllCards(object[] args)
+        {
+            string[] array = inventoryManager.ShowAllCards();
+            for (int i = 0; i < array.Length; i++)
+            {
+                Console.WriteLine("\t-" + array[i]);
+            }
+        }
+
         private void bindFuncToDel()
         {
             //bind manualy for now
@@ -90,10 +108,11 @@ namespace MTGLibraryProject
             mapFuncToString("add", cmd);
             cmd = remove;
             mapFuncToString("remove", cmd);
-
+            cmd = showAllCards;
+            mapFuncToString("list", cmd);
         }
 
-        private void mapFuncToString(string key,Command command)
+        private void mapFuncToString(string key, Command command)
         {
             commands[key] = command;
         }

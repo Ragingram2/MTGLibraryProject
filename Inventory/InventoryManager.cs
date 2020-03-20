@@ -112,5 +112,10 @@ namespace MTGLibraryProject
         {
 
         }
+
+        public string[] ShowAllCards()
+        {
+            return inventory.ShowAllCards();
+        }
     }
 }

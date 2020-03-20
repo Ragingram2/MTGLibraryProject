@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,13 +12,19 @@ namespace MTGLibraryProject
         Dictionary<string, Card> cards = new Dictionary<string, Card>();
         List<GoogleSheetRow> rows = new List<GoogleSheetRow>();
         List<GoogleSheetCell> cells;
+        GoogleSheetsHelper gsh;
         Vector white = new Vector();
         public Inventory()
         {
             white.x = 1;
             white.y = 1;
             white.z = 1;
-            var gsh = new GoogleSheetsHelper("MTGLibraryProject-0d5d6f0d5bf2.json", "1H-EbfU7mq4Gv2_YAkFpLiMD8tPikqhgUGda1iWvJr3Q");
+            Refresh();
+        }
+
+        public void Initialize()
+        {
+            gsh = new GoogleSheetsHelper("MTGLibraryProject-0d5d6f0d5bf2.json", "1H-EbfU7mq4Gv2_YAkFpLiMD8tPikqhgUGda1iWvJr3Q");
             var row1 = new GoogleSheetRow();
             cells = new List<GoogleSheetCell>()
             {
@@ -35,10 +42,31 @@ namespace MTGLibraryProject
             };
             row1.Cells.AddRange(cells);
             rows.Add(row1);
-            //Add(new string[] { "Prey Upon", "G", "Throne of Eldrain", "G", "false", "Sorcery", "", "Target creature you control fights target creature you don't control", "", "" });
-            ////Add(new string[] { "Prey Upon U", "G", "Throne of Eldrain", "G", "false", "Sorcery", "", "Target creature you control fights target creature you don't control", "", "" });
-            //Add(new string[] { "Portcullis Vine", "G", "Throne of Eldrain", "G", "false", "Creature,Plant,Wall", "Defender", "[2],Tap,Sacrifice a creature with defender: Draw Card", "0", "3" });
-            //Add(new string[] { "Feed the Clan", "[1],G", "Kahns of Tarkir", "G", "false", "Instant", "", "You gain 5 life. Ferocious-You gain 10 life instead if you control a creature with power 4 or greater", "", "" });
+        }
+
+        public void Refresh()
+        {
+            Initialize();
+            cards.Clear();
+            var gsp = new GoogleSheetParameters() { RangeColumnStart = 1, RangeRowStart = 1, RangeColumnEnd = 11, RangeRowEnd = 130, FirstRowIsHeaders = true, SheetName = "Sheet1" };
+            var rowValues = gsh.GetDataFromSheet(gsp);
+            foreach (ExpandoObject rowValue in rowValues)
+            {
+                cards.Add(rowValue.ToArray()[1].Value.ToString(), new Card()
+                {
+                    Id = UInt32.Parse(rowValue.ToArray()[0].Value.ToString()),
+                    Name = rowValue.ToArray()[1].Value.ToString(),
+                    Colors = rowValue.ToArray()[2].Value.ToString().Split(','),
+                    Set = rowValue.ToArray()[3].Value.ToString(),
+                    Cost = rowValue.ToArray()[4].Value.ToString().Split(','),
+                    Equipable = rowValue.ToArray()[5].Value.ToString(),
+                    CardTypes = rowValue.ToArray()[6].Value.ToString().Split(','),
+                    Keywords = rowValue.ToArray()[7].Value.ToString().Split(','),
+                    Description = rowValue.ToArray()[8].Value.ToString(),
+                    Power = rowValue.ToArray()[9].Value.ToString(),
+                    Toughness = rowValue.ToArray()[10].Value.ToString()
+                });
+            }
             gsh.AddCells(new GoogleSheetParameters() { SheetName = "Sheet1", RangeColumnStart = 1, RangeRowStart = 1 }, rows);
         }
 
@@ -46,16 +74,16 @@ namespace MTGLibraryProject
         {
             Card card = new Card();
             //card.Id = UInt32.Parse((string)args[0]);
-            card.Name = (string)args[0];
+            card.Name = args[0].ToString();
             card.Colors = args[1].ToString().Split(',');
-            card.Set = (string)args[2];
+            card.Set = args[2].ToString();
             card.Cost = args[3].ToString().Split(',');
-            card.Equipable = args[4].ToString().ToLower().Equals("false") ? false : true;
+            card.Equipable = args[4].ToString().ToLower();
             card.CardTypes = args[5].ToString().Split(',');
             card.Keywords = args[6].ToString().Split(',');
-            card.Description = (string)args[7];
-            card.Power = (string)args[8];
-            card.Toughness = (string)args[9];
+            card.Description = args[7].ToString();
+            card.Power = args[8].ToString();
+            card.Toughness = args[9].ToString();
             //cards.Add(card.Name, card);
             var row = new GoogleSheetRow();
             cells = new List<GoogleSheetCell>()
@@ -74,10 +102,20 @@ namespace MTGLibraryProject
             };
             row.Cells.AddRange(cells);
             rows.Add(row);
+            Refresh();
+        }
+        public string[] ShowAllCards()
+        {
+            //Console.WriteLine(cards.);
+            return cards.Keys.ToArray<string>();
         }
         public string ShowCard(string cardname)
         {
-            return cards[cardname].ToString();
+            if(cards.ContainsKey(cardname))
+            {
+                return cards[cardname].ToString();
+            }
+            return "This card is not in our library";
         }
         public List<Card> GetByName(string cardname)
         {
@@ -87,7 +125,7 @@ namespace MTGLibraryProject
         public List<Card> GetByColor(string[] colors)
         {
             List<Card> result = new List<Card>();
-            foreach(var item in cards)
+            foreach (var item in cards)
             {
                 if (item.Value.Colors.SequenceEqual(colors))
                 {
@@ -106,11 +144,43 @@ namespace MTGLibraryProject
             List<Card> result = new List<Card>();
             foreach (var item in cards)
             {
-                if (item.Value.Colors.SequenceEqual(cost))
+                if (item.Value.Cost.SequenceEqual(cost))
                 {
                     result.Add(item.Value);
                 }
             }
+            return result;
+        }
+        public List<Card> GetByEquipable(string equipable)
+        {
+            var result = cards.Where(kvp => kvp.Value.Equipable.Contains(equipable.ToUpper())).Select(kvp => kvp.Value).ToList();
+            return result;
+        }
+        public List<Card> GetByCardTypes(string[] cardTypes)
+        {
+            List<Card> result = new List<Card>();
+            foreach (var item in cards)
+            {
+                if (item.Value.CardTypes.SequenceEqual(cardTypes))
+                {
+                    result.Add(item.Value);
+                }
+            }
+            return result;
+        }
+        public List<Card> GetByDescription(string description)
+        {
+            var result = cards.Where(kvp => kvp.Value.Description.Contains(description)).Select(kvp => kvp.Value).ToList();
+            return result;
+        }
+        public List<Card> GetByPower(string power)
+        {
+            var result = cards.Where(kvp => kvp.Value.Power.Contains(power)).Select(kvp => kvp.Value).ToList();
+            return result;
+        }
+        public List<Card> GetByToughness(string toughness)
+        {
+            var result = cards.Where(kvp => kvp.Value.Toughness.Contains(toughness)).Select(kvp => kvp.Value).ToList();
             return result;
         }
     }

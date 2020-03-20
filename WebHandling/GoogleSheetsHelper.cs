@@ -75,6 +75,12 @@ namespace MTGLibraryProject
                     var columnCounter = 0;
                     foreach (var columnName in columnNames)
                     {
+                        if(columnCounter > row.Count-1)
+                        {
+                            expandoDict.Add(columnName, "");
+                            columnCounter++;
+                            continue;
+                        }
                         expandoDict.Add(columnName, row[columnCounter].ToString());
                         columnCounter++;
                     }

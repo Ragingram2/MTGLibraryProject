@@ -13,7 +13,7 @@ namespace MTGLibraryProject
         private string[] colors;
         private string set;
         private string[] cost;
-        private bool equipable;
+        private string equipable;
         private string[] cardTypes;
         private string[] keywords;
         private string description;
@@ -24,12 +24,17 @@ namespace MTGLibraryProject
 
         }
 
+        public Card(uint _id,string _name,string[] _colors,string set,string[] cost,string equipable,string[] _cardTypes,string[] keywords,string description,string power, string toughness)
+        {
+
+        }
+
         public uint Id { set { id = value; } get { return id; } }
         public string Name { set { name = value; } get { return name; } }
         public string[] Colors { set { colors = value; } get { return colors; } }
         public string Set { set { set = value; } get { return set; } }
         public string[] Cost { set { cost= value; } get { return cost; } }
-        public bool Equipable { set { equipable = value; } get { return equipable; } }
+        public string Equipable { set { equipable = value; } get { return equipable; } }
         public string[] CardTypes { set { cardTypes = value; } get { return cardTypes; } }
         public string[] Keywords { set { keywords = value; } get { return keywords; } }
         public string Description { set { description = value; } get { return description; } }
