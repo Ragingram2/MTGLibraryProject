@@ -24,7 +24,7 @@ namespace MTGLibraryProject
 
         public void Initialize()
         {
-            gsh = new GoogleSheetsHelper("MTGLibraryProject-0d5d6f0d5bf2.json", "1H-EbfU7mq4Gv2_YAkFpLiMD8tPikqhgUGda1iWvJr3Q");
+            gsh = new GoogleSheetsHelper("mtglibraryproject-9e15814755d6.json", "1H-EbfU7mq4Gv2_YAkFpLiMD8tPikqhgUGda1iWvJr3Q");
             var row1 = new GoogleSheetRow();
             cells = new List<GoogleSheetCell>()
             {
@@ -48,7 +48,7 @@ namespace MTGLibraryProject
         {
             Initialize();
             cards.Clear();
-            var gsp = new GoogleSheetParameters() { RangeColumnStart = 1, RangeRowStart = 1, RangeColumnEnd = 11, RangeRowEnd = 130, FirstRowIsHeaders = true, SheetName = "Sheet1" };
+            var gsp = new GoogleSheetParameters() { RangeColumnStart = 1, RangeRowStart = 1, RangeColumnEnd = 11, RangeRowEnd = 361, FirstRowIsHeaders = true, SheetName = "Sheet1" };
             var rowValues = gsh.GetDataFromSheet(gsp);
             foreach (ExpandoObject rowValue in rowValues)
             {
